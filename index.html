@@ -7,20 +7,120 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Tic-Tac-Toe</h1>
-    <div class="board">
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
+    <div class="buttons">
+        <button onclick="startGame('player')">Player First</button>
+        <button onclick="startGame('computer')">Computer First</button>
     </div>
-    <h2 id="statusMessage"></h2>
-    <button id="restartButton">Restart Game</button>
-    <script src="script.js"></script>
+    <div class="board hidden" id="board">
+        <div class="cell" id="cell0" onclick="playerMove(0)"></div>
+        <div class="cell" id="cell1" onclick="playerMove(1)"></div>
+        <div class="cell" id="cell2" onclick="playerMove(2)"></div>
+        <div class="cell" id="cell3" onclick="playerMove(3)"></div>
+        <div class="cell" id="cell4" onclick="playerMove(4)"></div>
+        <div class="cell" id="cell5" onclick="playerMove(5)"></div>
+        <div class="cell" id="cell6" onclick="playerMove(6)"></div>
+        <div class="cell" id="cell7" onclick="playerMove(7)"></div>
+        <div class="cell" id="cell8" onclick="playerMove(8)"></div>
+    </div>
+
+    <script>
+        let board = ['', '', '', '', '', '', '', '', ''];
+        const magicSquare = [8, 1, 6, 3, 5, 7, 4, 9, 2];
+        let currentPlayer = 'X';
+        const winningCombos = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        function startGame(firstMove) {
+            document.getElementById('board').classList.remove('hidden');
+            if (firstMove === 'computer') {
+                computerMove();
+            }
+        }
+
+        function playerMove(index) {
+            if (board[index] === '') {
+                board[index] = 'X';
+                document.getElementById('cell' + index).textContent = 'X';
+                if (checkWin('X')) {
+                    alert('Player wins!');
+                    resetGame();
+                    return;
+                }
+                if (board.includes('')) {
+                    computerMove();
+                } else {
+                    alert('Draw!');
+                    resetGame();
+                }
+            }
+        }
+
+        function computerMove() {
+            let move = getBestMove();
+            board[move] = 'O';
+            document.getElementById('cell' + move).textContent = 'O';
+            if (checkWin('O')) {
+                alert('Computer wins!');
+                resetGame();
+                return;
+            }
+            if (!board.includes('')) {
+                alert('Draw!');
+                resetGame();
+            }
+        }
+
+        function getBestMove() {
+            if (board.every(cell => cell === '')) {
+                return board[4] === '' ? 4 : 0;
+            }
+
+            let move = findWinningMove('O');
+            if (move !== -1) return move;
+
+            move = findWinningMove('X');
+            if (move !== -1) return move;
+
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === '') return i;
+            }
+
+            return -1;
+        }
+
+        function findWinningMove(player) {
+            let playerMoves = board.map((val, idx) => val === player ? idx : null).filter(val => val !== null);
+            for (let i = 0; i < playerMoves.length; i++) {
+                for (let j = i + 1; j < playerMoves.length; j++) {
+                    let D = 15 - (magicSquare[playerMoves[i]] + magicSquare[playerMoves[j]]);
+                    if (D > 0 && D <= 9) {
+                        let move = magicSquare.indexOf(D);
+                        if (board[move] === '') {
+                            return move;
+                        }
+                    }
+                }
+            }
+            return -1;
+        }
+
+        function checkWin(player) {
+            return winningCombos.some(combo => combo.every(index => board[index] === player));
+        }
+
+        function resetGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            document.querySelectorAll('.cell').forEach(cell => cell.textContent = '');
+            currentPlayer = 'X';
+        }
+    </script>
 </body>
 </html>
